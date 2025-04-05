@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <title>To-do-List</title>
+    <style>
+
+      body {
+        width: 50%;
+        max-width: 800px;
+        min-width: 480px;
+        margin: 0 auto;
+      }
+
+      .text {
+        color: rgb(255, 74, 74);
+        padding: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>My ToDo List</h1>
+
+    <div class="form">
+      <input type="text" id="insert" class="insert">
+      <input type="submit" value="Add" class="submititem">
+    </div>
+
+    <div id="to-do-container"></div>
+
+    <div class="alreadyin"  style="display: flex; align-items: center;">
+      <p class="text"></p>
+      <input type="submit" value="Okay" class="okaybutton">
+    </div>
+    <script>
+
+const container = document.createElement("div");
+const additem = document.querySelector('.submititem');
+const okaybutton = document.querySelector('.okaybutton');
+const alreadyin = document.querySelector('.text');
+let tasksarray = [];
+
+container.id = "task-container";
+
+document.body.appendChild(container);
+
+getlist();
+
+tasksarray = JSON.parse(localStorage.getItem("tasksarray"))
+
+okaybutton.style.display = "none";
+
+
+function addtodo() {
+    const localarray = JSON.parse(localStorage.getItem("tasksarray"));
+    const type = document.getElementById("insert");
+    const task = type.value;
+
+    if (localarray.includes(task)) {
+        alreadyin.textContent = "Task is already in list.";
+        okaybutton.style.display = "block";
+    } else {
+        localarray.push(task);
+        localStorage.setItem("tasksarray", JSON.stringify(localarray));
+    }
+}
+
+
+function getlist() {
+  const thearray = JSON.parse(localStorage.getItem("tasksarray"));
+  const container = document.getElementById("task-container");
+
+container.innerHTML = "";
+
+  thearray.forEach((task, index) => {
+
+    const div = document.createElement("div");
+    div.style.display = "flex";
+    div.style.alignItems = "center";
+
+    
+    const thetext = document.createElement("p");
+    thetext.style.paddingRight = "10px";
+    thetext.textContent = `${index + 1}. ${task}`; 
+
+   
+    const input = document.createElement("input");
+    input.type = "button";
+    input.value = "Remove";
+    
+    
+
+    input.addEventListener("click", () => {
+      thearray.splice(index, 1);
+      localStorage.setItem("tasksarray", JSON.stringify(thearray));
+      getlist(); 
+    });
+
+
+
+    
+    div.appendChild(thetext);
+    div.appendChild(input);
+    container.appendChild(div);
+  });
+}
+
+
+
+
+window.addEventListener('keydown',(event)=>{
+  if (event.keyCode === 13) {
+    addtodo();
+    getlist();
+    }})
+
+additem.addEventListener("click", (e)=>{   
+    addtodo();
+  getlist();
+});
+
+okaybutton.addEventListener("click", (e)=>{   
+    okaybutton.style.display = "none";
+    alreadyin.textContent = "";
+});
+
+    
+    </script>
+  </body>
+</html>
