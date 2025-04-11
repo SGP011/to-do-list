@@ -34,6 +34,11 @@
     </div>
     <script>
 
+if (localStorage.getItem("tasksarray")) {
+} else {
+  localStorage.setItem("tasksarray", JSON.stringify([]));
+}
+
 const container = document.createElement("div");
 const additem = document.querySelector('.submititem');
 const okaybutton = document.querySelector('.okaybutton');
