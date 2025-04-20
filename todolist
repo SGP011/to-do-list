@@ -4,114 +4,127 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>ToDo List</title>
- 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
   </head>
   <body class="bg-success-subtle">
     <div class="d-flex flex-column align-items-center">
-
-      
       <h1 class="mb-5">My ToDo List</h1>
-
-      
       <div class="form mb-4">
         <div>
           <input type="text" id="insert" class="insert">
           <input type="submit" value="Add" class="submititem btn btn-success">
         </div>
       </div>
-
-    
       <div id="to-do-container" class="w-100" style="max-width: 550px;"></div>
-
-     
       <div class="alreadyin d-flex mt-3">
-          <p class="text mx-2"></p>
-          <input class="okaybutton btn btn-primary" type="submit" value="Okay">
+        <p class="text mx-2"></p>
+        <input class="okaybutton btn btn-secondary" type="submit" value="Okay">
       </div>
-
     </div>
 
-    
     <script>
-      
+
+    
       if (localStorage.getItem("tasksarray")) {
-} else {
-  localStorage.setItem("tasksarray", JSON.stringify([]));
-}
+      } else { 
+        const firstlist = [
+          {
+            "listName": "My To Dos",
+            "listItems": [], 
+            "createdOn": "",
+            "order": 1
+          }];
+        localStorage.setItem("tasksarray", JSON.stringify(firstlist));}
 
       const container = document.getElementById("to-do-container");
       const additem = document.querySelector('.submititem');
-const okaybutton = document.querySelector('.okaybutton');
-const alreadyin = document.querySelector('.text');
-let tasksarray = [];
-
-     
+      const okaybutton = document.querySelector('.okaybutton');
+      const alreadyin = document.querySelector('.text');
+      let tasksarray = []
       okaybutton.style.display = "none";
-      
+
+    
       function addtodo() {
-    const localarray = JSON.parse(localStorage.getItem("tasksarray"));
-    const type = document.getElementById("insert");
-    const task = type.value;
+        const storage = JSON.parse(localStorage.getItem("tasksarray"));
+        function definelist(list) {
+  return list.listName === "My To Dos";}
+const defaultlist = storage.find(definelist);
+        const type = document.getElementById("insert");
+        const description = type.value;
+     
 
-    if (localarray.includes(task)) {
-        alreadyin.textContent = "Task is already in list.";
-        okaybutton.style.display = "block";
-    } else {
-        localarray.push(task);
-        localStorage.setItem("tasksarray", JSON.stringify(localarray));
-    }
-}
-
-
-      function getlist() {
-          const thearray = JSON.parse(localStorage.getItem("tasksarray"));
-          container.innerHTML = "";
-
-          thearray.forEach((task, index) => {
-              const div = document.createElement("div");
-              div.classList.add("d-flex", "align-items-center", "mb-2");
-              
-              const thetext = document.createElement("p");
-              thetext.classList.add("bg-primary-subtle", "rounded-4", "border", "border-2", "border-dark", "flex-grow-1", "p-2");
-              thetext.textContent = `${index + 1}. ${task}`; 
-
-              const input = document.createElement("input");
-              input.type = "button";
-              input.value = "Remove";
-              input.classList.add("btn", "bg-danger", "mx-2", "mb-3");
-              
-              input.addEventListener("click", () => {
-                  thearray.splice(index, 1);
-                  localStorage.setItem("tasksarray", JSON.stringify(thearray));
-                  getlist(); 
-              });
-              
-              div.appendChild(thetext);
-              div.appendChild(input);
-              container.appendChild(div);
+        if ( defaultlist.listItems.find(task => task.description === description) ) {
+          alreadyin.textContent = "Task is already in list.";
+          okaybutton.style.display = "block";
+} else {       
+          defaultlist.listItems.push({
+            "description": description,
+            "createdon": "",  
+            "order": defaultlist.listItems.length + 1,
+            "isfavorite": false,
+            "finishedon": "",
+            "dueOn": "",
+            "categoryid": 1,
+            "startedon": ""
           });
+          localStorage.setItem("tasksarray", JSON.stringify(storage));
+          console.log(defaultlist)
+        }
       }
 
-      window.addEventListener('keydown',(event)=>{
-  if (event.keyCode === 13) {
-    addtodo();
-    getlist();
-    }})
-     
-    additem.addEventListener("click", (e) => {
-       addtodo();
-      getlist();
+    
+      function getlist() {
+    const storage = JSON.parse(localStorage.getItem("tasksarray"));
+    function definethelist(list) {
+  return list.listName === "My To Dos";}
+const mainlist = storage.find(definethelist);
+    container.innerHTML = "";
+
+    mainlist.listItems.forEach((task, index) => {
+        const div = document.createElement("div");
+        div.classList.add("d-flex", "align-items-center", "mb-2");
+
+        const thetext = document.createElement("p");
+        thetext.classList.add("bg-primary-subtle", "rounded-4", "border", "border-2", "border-dark", "flex-grow-1", "p-2");
+        thetext.textContent = `${index + 1}. ${task.description}`;
+
+        const input = document.createElement("input");
+        input.type = "button";
+        input.value = "Remove";
+        input.classList.add("btn", "bg-danger", "mx-2", "mb-3");
+        input.addEventListener("click", () => {
+            mainlist.listItems.splice(index, 1);
+            localStorage.setItem("tasksarray", JSON.stringify(storage));
+            getlist();
+        });
+
+        div.appendChild(thetext);
+        div.appendChild(input);
+        container.appendChild(div);
+    });
+}
+
+      
+      window.addEventListener('keydown', (event) => {
+        if (event.keyCode === 13) {
+          addtodo();
+          getlist();
+        }
       });
 
+      additem.addEventListener("click", () => {
+        addtodo();
+        getlist();
+      });
 
-  okaybutton.addEventListener("click", (e) => {
- okaybutton.style.display = "none";
-alreadyin.textContent = "";
- });
-      
-      getlist();    
-      </script>
-      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
+      okaybutton.addEventListener("click", () => {
+        okaybutton.style.display = "none";
+        alreadyin.textContent = "";
+      });
+
+   
+      getlist();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
   </body>
 </html>
