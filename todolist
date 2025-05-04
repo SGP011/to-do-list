@@ -21,88 +21,91 @@
         <input class="okaybutton btn btn-secondary" type="submit" value="Okay">
       </div>
     </div>
+  
+    <script type="module">
+       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js";
+  import { getFirestore, collection, addDoc, onSnapshot, orderBy, query, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
-    <script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBgdYYDmVd8cDbbc-bVmuGAIjDru3OyZcI",
+    authDomain: "to-do-list-ef833.firebaseapp.com",
+    projectId: "to-do-list-ef833",
+    storageBucket: "to-do-list-ef833.firebasestorage.app",
+    messagingSenderId: "275497918618",
+    appId: "1:275497918618:web:b626e82d5b25400c0cbf23",
+    measurementId: "G-V15W2CBSL3"
+  };
 
-    
-      if (localStorage.getItem("tasksarray")) {
-      } else { 
-        const firstlist = [
-          {
-            "listName": "My To Dos",
-            "listItems": [], 
-            "createdOn": "",
-            "order": 1
-          }];
-        localStorage.setItem("tasksarray", JSON.stringify(firstlist));}
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const db = getFirestore(app);
+
 
       const container = document.getElementById("to-do-container");
       const additem = document.querySelector('.submititem');
       const okaybutton = document.querySelector('.okaybutton');
       const alreadyin = document.querySelector('.text');
-      let tasksarray = []
       okaybutton.style.display = "none";
 
     
-      function addtodo() {
-        const storage = JSON.parse(localStorage.getItem("tasksarray"));
-        function definelist(list) {
-  return list.listName === "My To Dos";}
-const defaultlist = storage.find(definelist);
-        const type = document.getElementById("insert");
-        const description = type.value;
-     
-
-        if ( defaultlist.listItems.find(task => task.description === description) ) {
-          alreadyin.textContent = "Task is already in list.";
-          okaybutton.style.display = "block";
-} else {       
-          defaultlist.listItems.push({
-            "description": description,
-            "createdon": "",  
-            "order": defaultlist.listItems.length + 1,
-            "isfavorite": false,
-            "finishedon": "",
-            "dueOn": "",
-            "categoryid": 1,
-            "startedon": ""
-          });
-          localStorage.setItem("tasksarray", JSON.stringify(storage));
-          console.log(defaultlist)
+      async function addtodo() {
+    const type = document.getElementById("insert");
+    const description = type.value; 
+        try {
+            await addDoc(collection(db, 'todolist'), {
+                description: description,
+                createdAt: serverTimestamp()
+            });
+        } catch (error) {
+            console.error("Error adding document: ", error);
         }
-      }
+  }
+      
 
+  
+      
+  window.deletetask = async function(id) {
+  try {
+    await deleteDoc(doc(db, 'todolist', id));
+  } catch (error) {
+    console.error("Error removing document: ", error);
+  }
+};
     
-      function getlist() {
-    const storage = JSON.parse(localStorage.getItem("tasksarray"));
-    function definethelist(list) {
-  return list.listName === "My To Dos";}
-const mainlist = storage.find(definethelist);
-    container.innerHTML = "";
+          function getlist() {
+    const q = query(collection(db, 'todolist'), orderBy('createdAt'));
 
-    mainlist.listItems.forEach((task, index) => {
+    onSnapshot(q, (snapshot) => {
+      container.innerHTML = "";
+      let number = 1;
+
+      snapshot.forEach((docSnapshot) => {
+        const task = docSnapshot.data();
+
         const div = document.createElement("div");
         div.classList.add("d-flex", "align-items-center", "mb-2");
 
         const thetext = document.createElement("p");
         thetext.classList.add("bg-primary-subtle", "rounded-4", "border", "border-2", "border-dark", "flex-grow-1", "p-2");
-        thetext.textContent = `${index + 1}. ${task.description}`;
+        thetext.textContent = `${number++}. ${task.description}`;
+
 
         const input = document.createElement("input");
         input.type = "button";
         input.value = "Remove";
         input.classList.add("btn", "bg-danger", "mx-2", "mb-3");
         input.addEventListener("click", () => {
-            mainlist.listItems.splice(index, 1);
-            localStorage.setItem("tasksarray", JSON.stringify(storage));
-            getlist();
+          window.deletetask(docSnapshot.id);
         });
 
+  
         div.appendChild(thetext);
         div.appendChild(input);
         container.appendChild(div);
+      });
     });
-}
+  }
 
       
       window.addEventListener('keydown', (event) => {
